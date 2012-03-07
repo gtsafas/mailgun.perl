@@ -9,7 +9,7 @@ use MIME::Base64;
 require LWP::UserAgent;
 
 BEGIN {
-    our $VERSION = 0.3;
+    our $VERSION = 0.4;
 }
 
 sub new {
@@ -150,8 +150,6 @@ sub mailboxes {
 WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
 
 =head1 SYNOPSIS
-
-    use Mailgun;
 
     use WWW::Mailgun;
 
