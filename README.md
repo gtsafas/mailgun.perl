@@ -44,7 +44,8 @@ from => the only optional field, it can be set in the message.
 Send takes in a hash of settings
 Takes all specificed here http://documentation.mailgun.net/api-sending.html
 'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
-ie:     
+### ie:  
+
     # Send a HTML message with attachments
     #
     $mg->send({
