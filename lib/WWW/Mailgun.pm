@@ -9,7 +9,7 @@ use MIME::Base64;
 require LWP::UserAgent;
 
 BEGIN {
-    our $VERSION = 0.1;
+    our $VERSION = 0.2;
 }
 
 sub new {
