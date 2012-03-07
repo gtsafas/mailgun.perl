@@ -3,8 +3,11 @@ package Mailgun;
 use strict;
 use warnings;
 
+use Data::Dumper;
+
 use JSON;
 use MIME::Base64;
+
 require LWP::UserAgent;
 
 sub new {
@@ -18,7 +21,23 @@ sub new {
     my $self = {
         ua  => LWP::UserAgent->new,
         url => $Url . '/' . $Domain . '/',
-        from => $From
+        from => $From,
+
+    };
+
+    $self->{get} = sub {
+        my ($self, $type) = @_;
+        return my $r = $self->{ua}->get(_get_route($self,$type));
+    };
+
+    $self->{del} = sub {
+        my ($self, $type, $data) = @_;
+        return my $r = $self->{ua}->delete(_get_route($self,[$type,$data]));
+    };
+
+    $self->{post} = sub {
+        my ($self, $type, $data) = @_;
+        return my $r = $self->{ua}->post(_get_route($self,$type), Content => $data);
     };
 
     $self->{ua}->default_header('Authorization' => 'Basic ' . encode_base64('api:' . $Key));
@@ -60,24 +79,36 @@ sub send {
     return from_json($r->{_content});
 }
 
-sub unsubscribes {
-    my $self = shift;
+sub _get_route {
+    my ($self, $path) = @_;
 
-    my $r = $self->{ua}->get($self->{url}.'unsubscribes');
+    if (ref $path eq 'ARRAY'){
+        $path = join('/',@$path);
+    }
+    return $self->{url} . $path;
+}
+
+sub unsubscribes {
+    my ($self, $method, $data) = @_;
+    $method = $method // 'get';
+    
+    my $r = $self->{lc($method)}->($self,'unsubscribes',$data);
     return from_json($r->{_content});
 }
 
 sub complaints {
-    my $self = shift;
+    my ($self, $method, $data) = @_;
+    $method = $method // 'get';
 
-    my $r = $self->{ua}->get($self->{url}.'complaints');
+    my $r = $self->{lc($method)}->($self,'complaints',$data);
     return from_json($r->{_content});
 }
 
 sub bounces {
-    my $self = shift;
+    my ($self, $method, $data) = @_;
+    $method = $method // 'get';
 
-    my $r = $self->{ua}->get($self->{url}.'bounces');
+    my $r = $self->{lc($method)}->($self,'bounces',$data);
     return from_json($r->{_content});
 }
 

@@ -10,19 +10,13 @@ use Mailgun;
 
 
 my $mg = Mailgun->new({ 
-    key => 'key-',
-    domain => 'elbowrage.mailgun.org',
-    from => 'elb0w <elb0w@elbowrage.mailgun.org>'
+    key => 'key-2hic097u1i9gyw1-3esz5l4qu5aluq49',
+    domain => 'rblt.mailgun.org',
+    from => 'devels <devels@rblt.mailgun.org>'
 });
 
 
-$mg->unsubscribes;
-
-$mg->send({
-      to => 'some_email@gmail.com',
-      subject => 'hello',
-      text => 'test',
-      html => '<html><h3>hello</h3><strong>world</strong></html>',
-      attachment => ['/Users/elb0w/GIT/Personal/Mailgun/test.pl']
-  
-});
+print Dumper $mg->complaints;
+#print Dumper $mg->unsubscribe('get','gtsafas@rblt.com');
+#print Dumper $mg->unsubscribes('del','gtsafas@rblt.com');
+#print Dumper $mg->unsubscribes('post',{address => 'gtsafas@rblt.com', tag => '*'});

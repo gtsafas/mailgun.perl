@@ -40,13 +40,62 @@ easily leverage it.
 
     #Simple calls return an object with various stats
 
-    my $obj = $mg->unsubscribes; 
-    my $obj = $mg->complaints;
-    my $obj = $mg->bounces; 
-    my $obj = $mg->stats; 
-    my $obj = $mg->logs; 
-    my $obj = $mg->mailboxes;
+    ##
+    ## Unsubscribes
+    ##
+    # View all unsubscribes http://documentation.mailgun.net/api-unsubscribes.html
+    my $all = $mg->unsubscribes; 
 
+    # Unsubscribe user from all 
+    $mg->unsubscribes('post',{address => 'user@website.com', tag => '*'});
+
+    # Delete a user from unsubscriptions
+    $mg->unsubscribes('del','user@website.com');
+
+    # Get a user from unsubscriptions
+    $mg->unsubscribes('get','user@website.com');
+
+    ##
+    ## Complaints
+    ##
+    # View all spam complaints http://documentation.mailgun.net/api-complaints.html
+    my $all = $mg->complaints; 
+
+    # Add a spam complaint for a address
+    $mg->complaints('post',{address => 'user@website.com'});
+
+    # Remove a complaint
+    $mg->complaints('del','user@website.com');
+
+    # Get a complaint for a adress
+    $mg->complaints('get','user@website.com');
+
+    ##
+    ## Bounces
+    ##
+    # View the list of bounces http://documentation.mailgun.net/api-bounces.html
+    my $all = $mg->bounces; 
+
+    # Add a permanent bounce
+    $mg->bounces('post',{
+        address => 'user@website.com',
+        code => 550, #This is default
+        error => 'Error Description' #Empty by default
+    });
+
+    # Remove a bounce
+    $mg->bounces('del','user@website.com');
+
+    # Get a bounce for a specific address
+    $mg->bounces('get','user@website.com');
+
+    # Get stats http://documentation.mailgun.net/api-stats.html
+    my $obj = $mg->stats; 
+
+    # Get logs http://documentation.mailgun.net/api-logs.html
+    my $obj = $mg->logs; 
+
+    
 
 ### USAGE
 
@@ -58,14 +107,40 @@ from => the only optional field, it can be set in the message.
 
 
 
-#### send(mail)
+#### send($data)
 
 Send takes in a hash of settings
-...
+Takes all specificed here http://documentation.mailgun.net/api-sending.html
+ie: 
+    $mg->send({
+          to => 'some_email@gmail.com',
+          subject => 'hello',
+          html => '<html><h3>hello</h3><strong>world</strong></html>',
+          attachment => ['/Users/elb0w/GIT/Personal/Mailgun/test.pl']
+          o:tracking = False
+    });
+
+    'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
+
+#### unsubscribes, bounces, spam
+
+Helper methods all take a method argument (del, post, get)
+#http://documentation.mailgun.net/api_reference.html
+Post optionally takes a hash of properties
+
+ie:
+    $mg->helpermethod('get','arg1');
+    $mg->helpermethod('del','arg1');
+    $mg->helpermethod('post',{ property => value });
 
 #### TODO
 
-Rest of the docs and tests as im tired.
+Mailboxes
+Campaigns
+Mailing Lists
+Routes
+
+--Add Moose version
 
 #### Author
 
@@ -76,5 +151,9 @@ George Tsafas <elb0w@elbowrage.com>
 
 elb0w on irc.freenode.net #perl
 
+
+#### Resources
+
+http://documentation.mailgun.net/
 
 
