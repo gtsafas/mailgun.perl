@@ -1,9 +1,7 @@
-package Mailgun;
+package WWW::Mailgun;
 
 use strict;
 use warnings;
-
-use Data::Dumper;
 
 use JSON;
 use MIME::Base64;
@@ -45,10 +43,10 @@ sub new {
     return bless $self, $class;
 }
 
-sub _handleResponse {
+sub _handle_response {
     my ($response) = shift;
 
-    my $rc = $response->{_rc};
+    my $rc = $response->code;
 
     return 1 if $rc  == 200;
 
@@ -74,9 +72,9 @@ sub send {
 
     my $r = $self->{ua}->post($self->{url}.'messages',Content_Type => 'multipart/form-data', Content => $msg);
 
-    _handleResponse($r);
+    _handle_response($r);
 
-    return from_json($r->{_content});
+    return from_json($r->decoded_content);
 }
 
 sub _get_route {
@@ -94,7 +92,8 @@ sub unsubscribes {
     $method = $method // 'get';
     
     my $r = $self->{lc($method)}->($self,'unsubscribes',$data);
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
 sub complaints {
@@ -102,7 +101,8 @@ sub complaints {
     $method = $method // 'get';
 
     my $r = $self->{lc($method)}->($self,'complaints',$data);
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
 sub bounces {
@@ -110,30 +110,31 @@ sub bounces {
     $method = $method // 'get';
 
     my $r = $self->{lc($method)}->($self,'bounces',$data);
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
 sub stats {
     my $self = shift;
 
     my $r = $self->{ua}->get($self->{url}.'stats');
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
 sub logs {
     my $self = shift;
 
     my $r = $self->{ua}->get($self->{url}.'log');
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
 sub mailboxes {
     my $self = shift;
 
     my $r = $self->{ua}->get($self->{url}.'mailboxes');
-    return from_json($r->{_content});
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
-#TODO add routes
-
-=cut

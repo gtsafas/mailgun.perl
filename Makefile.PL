@@ -6,8 +6,8 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  NAME         => 'Mailgun',
-  VERSION_FROM => 'lib/Mailgun.pm',
+  NAME         => 'WWW::Mailgun',
+  VERSION_FROM => 'lib/Net/Mailgun.pm',
   PREREQ_PM    => {},
   AUTHOR       => 'George Tsafas <elb0w@elbowrage.com>'
 );
