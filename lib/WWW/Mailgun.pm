@@ -9,7 +9,7 @@ use MIME::Base64;
 require LWP::UserAgent;
 
 BEGIN {
-    our $VERSION = 0.2;
+    our $VERSION = 0.3;
 }
 
 sub new {
@@ -163,10 +163,10 @@ WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
 
     #sending examples below
    
-    # Get stats L<http://documentation.mailgun.net/api-stats.html>
+    # Get stats http://documentation.mailgun.net/api-stats.html
     my $obj = $mg->stats; 
 
-    # Get logs L<http://documentation.mailgun.net/api-logs.html>
+    # Get logs http://documentation.mailgun.net/api-logs.html
     my $obj = $mg->logs; 
 
     
@@ -268,8 +268,11 @@ L<http://documentation.mailgun.net/api_reference.html>
 =head1 TODO
 
 =item Mailboxes
+
 =item Campaigns
+
 =item Mailing Lists
+
 =item Routes
 
 =head1 Author
