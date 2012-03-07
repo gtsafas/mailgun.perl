@@ -45,7 +45,7 @@ Send takes in a hash of settings
 Takes all specificed here http://documentation.mailgun.net/api-sending.html
 'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
 
-### Send a HTML message with attachments
+##### Send a HTML message with attachments
     $mg->send({
           to => 'some_email@gmail.com',
           subject => 'hello',
@@ -53,7 +53,7 @@ Takes all specificed here http://documentation.mailgun.net/api-sending.html
           attachment => ['/Users/elb0w/GIT/Personal/Mailgun/test.pl']
     });
 
-### Send a text message
+##### Send a text message
     $mg->send({
           to => 'some_email@gmail.com',
           subject => 'hello',
@@ -67,7 +67,7 @@ Helper methods all take a method argument (del, post, get)
 #http://documentation.mailgun.net/api_reference.html
 Post optionally takes a hash of properties
 
-### Unsubscribes
+##### Unsubscribes
     
     # View all unsubscribes http://documentation.mailgun.net/api-unsubscribes.html
     my $all = $mg->unsubscribes; 
@@ -82,7 +82,7 @@ Post optionally takes a hash of properties
     $mg->unsubscribes('get','user@website.com');
 
     
-### Complaints
+##### Complaints
     
     # View all spam complaints http://documentation.mailgun.net/api-complaints.html
     my $all = $mg->complaints; 
@@ -96,7 +96,7 @@ Post optionally takes a hash of properties
     # Get a complaint for a adress
     $mg->complaints('get','user@website.com');
 
-### Bounces
+##### Bounces
 
     # View the list of bounces http://documentation.mailgun.net/api-bounces.html
     my $all = $mg->bounces; 
