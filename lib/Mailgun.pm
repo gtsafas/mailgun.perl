@@ -26,8 +26,8 @@ sub new {
     };
 
     $self->{get} = sub {
-        my ($self, $type) = @_;
-        return my $r = $self->{ua}->get(_get_route($self,$type));
+        my ($self, $type, $data) = @_;
+        return my $r = $self->{ua}->get(_get_route($self,[$type, $data]));
     };
 
     $self->{del} = sub {
@@ -83,7 +83,8 @@ sub _get_route {
     my ($self, $path) = @_;
 
     if (ref $path eq 'ARRAY'){
-        $path = join('/',@$path);
+        my @clean = grep {defined} @$path;
+        $path = join('/',@clean);
     }
     return $self->{url} . $path;
 }
