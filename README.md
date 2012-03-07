@@ -1,6 +1,6 @@
-Mailgun - Perl (Module name subject to change)
+WWW::Mailgun
 ===================
-#### Perl bindings for Mailgun (http://mailgun.org)
+#### Perl wrapper for Mailgun (http://mailgun.org)
 
 ### SYNOPSIS
 
@@ -13,9 +13,9 @@ Mailgun is a email service which provides email over a http restful API.
 These bindings goal is to create a perl interface which allows you to
 easily leverage it.
 
-    use Mailgun;
+    use WWW::Mailgun;
 
-    my $mg = Mailgun->new({ 
+    my $mg = WWW::Mailgun->new({ 
         key => 'key-yOuRapiKeY',
         domain => 'YourDomain.mailgun.org',
         from => 'elb0w <elb0w@YourDomain.mailgun.org>' # Optionally set here, you can set it when you send
