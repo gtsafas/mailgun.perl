@@ -147,7 +147,7 @@ sub mailboxes {
 
 =head1 NAME
 
-WWW::Mailgun - Perl wrapper for Mailgun (http://mailgun.org)
+WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
 
 =head1 SYNOPSIS
 
@@ -163,10 +163,10 @@ WWW::Mailgun - Perl wrapper for Mailgun (http://mailgun.org)
 
     #sending examples below
    
-    # Get stats http://documentation.mailgun.net/api-stats.html
+    # Get stats L<http://documentation.mailgun.net/api-stats.html>
     my $obj = $mg->stats; 
 
-    # Get logs http://documentation.mailgun.net/api-logs.html
+    # Get logs L<http://documentation.mailgun.net/api-logs.html>
     my $obj = $mg->logs; 
 
     
@@ -189,7 +189,7 @@ from => the only optional field, it can be set in the message.
 =head2 send($data)
 
 Send takes in a hash of settings
-Takes all specificed here http://documentation.mailgun.net/api-sending.html
+Takes all specificed here L<http://documentation.mailgun.net/api-sending.html>
 'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
 
 =item Send a HTML message with optional array of attachments
@@ -213,13 +213,13 @@ Takes all specificed here http://documentation.mailgun.net/api-sending.html
 =head2 unsubscribes, bounces, spam
 
 Helper methods all take a method argument (del, post, get)
-http://documentation.mailgun.net/api_reference.html
+L<http://documentation.mailgun.net/api_reference.html>
 'post' optionally takes a hash of properties
 
 
 =item Unsubscribes
 
-    # View all unsubscribes http://documentation.mailgun.net/api-unsubscribes.html
+    # View all unsubscribes L<http://documentation.mailgun.net/api-unsubscribes.html>
     my $all = $mg->unsubscribes; 
 
     # Unsubscribe user from all 
@@ -235,7 +235,7 @@ http://documentation.mailgun.net/api_reference.html
     
 =item Complaints
     
-    # View all spam complaints http://documentation.mailgun.net/api-complaints.html
+    # View all spam complaints L<http://documentation.mailgun.net/api-complaints.html>
     my $all = $mg->complaints; 
 
     # Add a spam complaint for a address
@@ -249,7 +249,7 @@ http://documentation.mailgun.net/api_reference.html
 
 =item Bounces
 
-    # View the list of bounces http://documentation.mailgun.net/api-bounces.html
+    # View the list of bounces L<http://documentation.mailgun.net/api-bounces.html>
     my $all = $mg->bounces; 
 
     # Add a permanent bounce
@@ -267,10 +267,10 @@ http://documentation.mailgun.net/api_reference.html
 
 =head1 TODO
 
-item= Mailboxes
-item= Campaigns
-item= Mailing Lists
-item= Routes
+=item Mailboxes
+=item Campaigns
+=item Mailing Lists
+=item Routes
 
 =head1 Author
 
@@ -279,12 +279,11 @@ George Tsafas <elb0w@elbowrage.com>
 =head1 Support
 
 elb0w on irc.freenode.net #perl
-https://github.com/gtsafas/mailgun.perl
+L<https://github.com/gtsafas/mailgun.perl>
 
 
 =head1 Resources
 
-http://documentation.mailgun.net/
+L<http://documentation.mailgun.net/>
 
-__END__
 
