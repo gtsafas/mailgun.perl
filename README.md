@@ -20,7 +20,31 @@ easily leverage it.
         domain => 'YourDomain.mailgun.org',
         from => 'elb0w <elb0w@YourDomain.mailgun.org>' # Optionally set here, you can set it when you send
     });
+   
+    # Get stats http://documentation.mailgun.net/api-stats.html
+    my $obj = $mg->stats; 
 
+    # Get logs http://documentation.mailgun.net/api-logs.html
+    my $obj = $mg->logs; 
+
+    
+
+### USAGE
+
+#### new({key => 'mailgun key', domain => 'your mailgun domain', from => 'optional from')
+
+Creates your mailgun object
+
+from => the only optional field, it can be set in the message.
+
+
+
+#### send($data)
+
+Send takes in a hash of settings
+Takes all specificed here http://documentation.mailgun.net/api-sending.html
+'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
+ie:     
     # Send a HTML message with attachments
     #
     $mg->send({
@@ -38,8 +62,19 @@ easily leverage it.
     });
 
 
-    #Simple calls return an object with various stats
+#### unsubscribes, bounces, spam
 
+Helper methods all take a method argument (del, post, get)
+#http://documentation.mailgun.net/api_reference.html
+Post optionally takes a hash of properties
+
+ie:
+    $mg->helpermethod('get','arg1');
+    $mg->helpermethod('del','arg1');
+    $mg->helpermethod('post',{ property => value });
+    
+    
+    
     ##
     ## Unsubscribes
     ##
@@ -88,50 +123,6 @@ easily leverage it.
 
     # Get a bounce for a specific address
     $mg->bounces('get','user@website.com');
-
-    # Get stats http://documentation.mailgun.net/api-stats.html
-    my $obj = $mg->stats; 
-
-    # Get logs http://documentation.mailgun.net/api-logs.html
-    my $obj = $mg->logs; 
-
-    
-
-### USAGE
-
-#### new({key => 'mailgun key', domain => 'your mailgun domain', from => 'optional from')
-
-Creates your mailgun object
-
-from => the only optional field, it can be set in the message.
-
-
-
-#### send($data)
-
-Send takes in a hash of settings
-Takes all specificed here http://documentation.mailgun.net/api-sending.html
-ie: 
-    $mg->send({
-          to => 'some_email@gmail.com',
-          subject => 'hello',
-          html => '<html><h3>hello</h3><strong>world</strong></html>',
-          attachment => ['/Users/elb0w/GIT/Personal/Mailgun/test.pl']
-          o:tracking = False
-    });
-
-    'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
-
-#### unsubscribes, bounces, spam
-
-Helper methods all take a method argument (del, post, get)
-#http://documentation.mailgun.net/api_reference.html
-Post optionally takes a hash of properties
-
-ie:
-    $mg->helpermethod('get','arg1');
-    $mg->helpermethod('del','arg1');
-    $mg->helpermethod('post',{ property => value });
 
 #### TODO
 
