@@ -204,7 +204,16 @@ Takes all specificed here L<http://documentation.mailgun.net/api-sending.html>
     $mg->send({
           to => 'some_email@gmail.com',
           subject => 'hello',
-          text => 'Hello there',
+          text => 'Hello there'
+    });
+
+=item Send a MIME multipart message
+
+    $mg->send({
+          to      => 'some_email@gmail.com',
+          subject => 'hello',
+          text    => 'Hello there',
+          html    => '<b>Hello there</b>'
     });
 
 
