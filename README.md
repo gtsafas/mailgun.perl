@@ -60,6 +60,13 @@ Takes all specificed here http://documentation.mailgun.net/api-sending.html
           text => 'Hello there',
     });
 
+##### Send a MIME multipart message
+    $mg->send({
+          to      => 'some_email@gmail.com',
+          subject => 'hello',
+          text    => 'Hello there',
+          html    => '<b>Hello there</b>'
+    });
 
 #### unsubscribes, bounces, spam
 
