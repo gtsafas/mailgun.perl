@@ -34,7 +34,8 @@ sub new {
 
     $self->{del} = sub {
         my ($self, $type, $data) = @_;
-        return my $r = $self->{ua}->delete(_get_route($self,[$type,$data]));
+        return my $r = $self->{ua}->request( HTTP::Request->new( 'DELETE', _get_route($self,[$type,$data]) ));
+	#delete(_get_route($self,[$type,$data]));
     };
 
     $self->{post} = sub {
