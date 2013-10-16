@@ -45,13 +45,32 @@ Send takes in a hash of settings
 Takes all specificed here http://documentation.mailgun.net/api-sending.html
 'from' is optionally set here, otherwise you can set it in the constructor and it can be used for everything
 
-##### Send a HTML message with attachments
+##### Send a HTML message with an attachment using a filename
     $mg->send({
           to => 'some_email@gmail.com',
           subject => 'hello',
           html => '<html><h3>hello</h3><strong>world</strong></html>',
           attachment => ['/Users/elb0w/GIT/Personal/Mailgun/test.pl']
     });
+
+##### Send a HTML message with an attachment using raw data
+    $mg->send({
+	to => 'some_email@gmail.com',
+	subject => 'hello',
+	html => '<html><h3>hello</h3><strong>world</strong></html>',
+	attachment => [ undef, 'something.txt', 'Hello from inside the file' ],
+    });
+
+#### Send a HTML message with multiple attachments
+    $mg->send({
+	to => 'some_email@gmail.com',
+	subject => 'hello',
+	html => '<html><h3>hello</h3><strong>world</strong></html>',
+	attachments => [
+	    [ '/Users/elb0w/GIT/Personal/Mailgun/test.pl' ],
+	    [ undef, 'something.txt', 'Hello from inside the file' ],
+	],
+    });	
 
 ##### Send a text message
     $mg->send({
