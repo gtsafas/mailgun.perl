@@ -35,7 +35,7 @@ sub new {
     $self->{del} = sub {
         my ($self, $type, $data) = @_;
         return my $r = $self->{ua}->request(
-	    HTTP::Request->new( 'DELETE', _get_route( $self, [$type, $data] ) )
+            HTTP::Request->new( 'DELETE', _get_route( $self, [$type, $data] ) )
         );
     };
 
@@ -79,9 +79,9 @@ sub send {
     my $attachments = delete $msg->{attachments};
     my $content = [%$msg];
     if ( $attachments && ref $attachments eq 'ARRAY' ) {
-	for my $a ( @$attachments ) {
-   	    push @$content, attachment => $a;
-	}
+        for my $a ( @$attachments ) {
+            push @$content, attachment => $a;
+        }
     }
 
     my $r = $self->{ua}->post($self->{url}.'messages',Content_Type => 'multipart/form-data', Content => $content);
