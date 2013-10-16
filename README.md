@@ -55,22 +55,22 @@ Takes all specificed here http://documentation.mailgun.net/api-sending.html
 
 ##### Send a HTML message with an attachment using raw data
     $mg->send({
-	to => 'some_email@gmail.com',
-	subject => 'hello',
-	html => '<html><h3>hello</h3><strong>world</strong></html>',
-	attachment => [ undef, 'something.txt', 'Hello from inside the file' ],
+          to => 'some_email@gmail.com',
+          subject => 'hello',
+          html => '<html><h3>hello</h3><strong>world</strong></html>',
+          attachment => [ undef, 'something.txt', 'Hello from inside the file' ],
     });
 
 #### Send a HTML message with multiple attachments
     $mg->send({
-	to => 'some_email@gmail.com',
-	subject => 'hello',
-	html => '<html><h3>hello</h3><strong>world</strong></html>',
-	attachments => [
-	    [ '/Users/elb0w/GIT/Personal/Mailgun/test.pl' ],
-	    [ undef, 'something.txt', 'Hello from inside the file' ],
-	],
-    });	
+          to => 'some_email@gmail.com',
+          subject => 'hello',
+          html => '<html><h3>hello</h3><strong>world</strong></html>',
+          attachments => [
+                [ '/Users/elb0w/GIT/Personal/Mailgun/test.pl' ],
+                [ undef, 'something.txt', 'Hello from inside the file' ],
+          ],
+    });
 
 ##### Send a text message
     $mg->send({
