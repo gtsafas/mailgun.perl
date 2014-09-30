@@ -84,7 +84,7 @@ sub send {
         }
     }
 
-    my $r = $self->{ua}->post($self->{url}.'messages',Content_Type => 'multipart/form-data', Content => $content);
+    my $r = $self->{ua}->post(_get_route($self, ['messages']),Content_Type => 'multipart/form-data', Content => $content);
 
     _handle_response($r);
 
@@ -131,7 +131,7 @@ sub bounces {
 sub stats {
     my $self = shift;
 
-    my $r = $self->{ua}->get($self->{url}.'stats');
+    my $r = $self->{ua}->get(_get_route($self, ['stats']));
     _handle_response($r);
     return from_json($r->decoded_content);
 }
@@ -139,7 +139,7 @@ sub stats {
 sub logs {
     my $self = shift;
 
-    my $r = $self->{ua}->get($self->{url}.'log');
+    my $r = $self->{ua}->get(_get_route($self, ['log']));
     _handle_response($r);
     return from_json($r->decoded_content);
 }
@@ -147,7 +147,7 @@ sub logs {
 sub mailboxes {
     my $self = shift;
 
-    my $r = $self->{ua}->get($self->{url}.'mailboxes');
+    my $r = $self->{ua}->get(_get_route($self, ['mailboxes']));
     _handle_response($r);
     return from_json($r->decoded_content);
 }
