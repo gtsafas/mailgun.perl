@@ -22,7 +22,8 @@ sub new {
 
     my $self = {
         ua  => LWP::UserAgent->new,
-        url => $Url . '/' . $Domain . '/',
+        url => $Url . '/',
+        domain => $Domain,
         from => $From,
 
     };
@@ -96,6 +97,7 @@ sub _get_route {
 
     if (ref $path eq 'ARRAY'){
         my @clean = grep {defined} @$path;
+        unshift @clean, $self->{domain};
         $path = join('/',@clean);
     }
     return $self->{url} . $path;
