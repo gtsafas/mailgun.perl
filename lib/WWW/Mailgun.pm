@@ -105,6 +105,8 @@ sub _get_route {
         unshift @clean, $self->{domain}
             unless $clean[-1] ~~ @IGNORE_DOMAIN;
         $path = join('/',@clean);
+    } elsif (!($path ~~ @IGNORE_DOMAIN)) {
+        $path = $self->{domain} . '/' . $path
     }
     return $self->{url} . $path;
 }
