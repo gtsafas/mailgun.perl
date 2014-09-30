@@ -41,7 +41,7 @@ sub new {
 
     $self->{post} = sub {
         my ($self, $type, $data) = @_;
-        return my $r = $self->{ua}->post(_get_route($self,$type), Content => $data);
+        return my $r = $self->{ua}->post(_get_route($self,$type), Content_Type => 'multipart/form-data', Content => $data);
     };
 
     $self->{ua}->default_header('Authorization' => 'Basic ' . encode_base64('api:' . $Key));
@@ -84,7 +84,7 @@ sub send {
         }
     }
 
-    my $r = $self->{ua}->post(_get_route($self, ['messages']),Content_Type => 'multipart/form-data', Content => $content);
+    my $r = $self->{post}->($self, 'messages', $content);
 
     _handle_response($r);
 
@@ -131,7 +131,7 @@ sub bounces {
 sub stats {
     my $self = shift;
 
-    my $r = $self->{ua}->get(_get_route($self, ['stats']));
+    my $r = $self->{get}->($self, 'stats');
     _handle_response($r);
     return from_json($r->decoded_content);
 }
@@ -139,7 +139,7 @@ sub stats {
 sub logs {
     my $self = shift;
 
-    my $r = $self->{ua}->get(_get_route($self, ['log']));
+    my $r = $self->{get}->($self, 'log');
     _handle_response($r);
     return from_json($r->decoded_content);
 }
@@ -147,7 +147,7 @@ sub logs {
 sub mailboxes {
     my $self = shift;
 
-    my $r = $self->{ua}->get(_get_route($self, ['mailboxes']));
+   my $r = $self->{get}->($self, 'mailboxes');
     _handle_response($r);
     return from_json($r->decoded_content);
 }
