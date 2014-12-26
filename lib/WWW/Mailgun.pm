@@ -12,11 +12,6 @@ BEGIN {
     our $VERSION = 0.5;
 }
 
-my @IGNORE_DOMAIN = qw/domains/;
-my @GET_METHODS = qw/stats domains log mailboxes/;
-my @POST_METHODS = qw//;
-my @ALL_METHODS = (@GET_METHODS, @POST_METHODS);
-
 sub new {
     my ($class, $param) = @_;
 
@@ -27,8 +22,7 @@ sub new {
 
     my $self = {
         ua  => LWP::UserAgent->new,
-        url => $Url . '/',
-        domain => $Domain,
+        url => $Url . '/' . $Domain . '/',
         from => $From,
 
     };
@@ -47,7 +41,7 @@ sub new {
 
     $self->{post} = sub {
         my ($self, $type, $data) = @_;
-        return my $r = $self->{ua}->post(_get_route($self,$type), Content_Type => 'multipart/form-data', Content => $data);
+        return my $r = $self->{ua}->post(_get_route($self,$type), Content => $data);
     };
 
     $self->{ua}->default_header('Authorization' => 'Basic ' . encode_base64('api:' . $Key));
@@ -90,7 +84,7 @@ sub send {
         }
     }
 
-    my $r = $self->{post}->($self, 'messages', $content);
+    my $r = $self->{ua}->post($self->{url}.'messages',Content_Type => 'multipart/form-data', Content => $content);
 
     _handle_response($r);
 
@@ -102,11 +96,7 @@ sub _get_route {
 
     if (ref $path eq 'ARRAY'){
         my @clean = grep {defined} @$path;
-        unshift @clean, $self->{domain}
-            unless $clean[-1] ~~ @IGNORE_DOMAIN;
         $path = join('/',@clean);
-    } elsif (!($path ~~ @IGNORE_DOMAIN)) {
-        $path = $self->{domain} . '/' . $path
     }
     return $self->{url} . $path;
 }
@@ -138,24 +128,26 @@ sub bounces {
     return from_json($r->decoded_content);
 }
 
-sub logs {
-    ## Legacy support.
+sub stats {
     my $self = shift;
-    return $self->log();
+
+    my $r = $self->{ua}->get($self->{url}.'stats');
+    _handle_response($r);
+    return from_json($r->decoded_content);
 }
 
-sub AUTOLOAD { ## Handle generic list of requests.
-    our $AUTOLOAD;
+sub logs {
     my $self = shift;
-    my @ObjParts = split(/\:\:/, $AUTOLOAD);
-    my $method = pop(@ObjParts);
-    return if $method eq 'DESTROY'; ## Ignore DESTROY.
-    unless ($method ~~ @ALL_METHODS) {
-        die("Not a valid method, \"$method\".");
-    }
-    my $mode = 'get';
-    $mode = 'post' if $method ~~ @POST_METHODS;
-    my $r = $self->{$mode}->($self, $method, @_);
+
+    my $r = $self->{ua}->get($self->{url}.'log');
+    _handle_response($r);
+    return from_json($r->decoded_content);
+}
+
+sub mailboxes {
+    my $self = shift;
+
+    my $r = $self->{ua}->get($self->{url}.'mailboxes');
     _handle_response($r);
     return from_json($r->decoded_content);
 }
