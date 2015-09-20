@@ -89,9 +89,12 @@ sub send {
 
     my $content = _prepare_content(
         $msg,
-        {
-            attachments => 'attachment',
-            tags        => 'o:tag',
+        attachments => {
+            send_as => 'attachment',
+        },
+        tags => {
+            send_as => 'o:tag',
+            max_num => 3,
         },
     );
 
@@ -103,12 +106,12 @@ sub send {
 }
 
 sub _prepare_content {
-    my ($msg, $msg_key__content_key) = @_;
+    my ($msg, %msg_key__options) = @_;
 
     my $content = [];
 
-    while ( my ( $msg_key, $content_key ) = each %$msg_key__content_key ) {
-        my $extra_content = _get_extra_content($msg, $msg_key, $content_key);
+    while ( my ( $msg_key, $options ) = each %$msg_key__options ) {
+        my $extra_content = _get_extra_content($msg, $msg_key, $options);
         push @$content, @$extra_content;
     }
 
@@ -118,13 +121,17 @@ sub _prepare_content {
 }
 
 sub _get_extra_content {
-    my ($msg, $msg_key, $content_key) = @_;
+    my ($msg, $msg_key, $options) = @_;
 
-    my $array = delete $msg->{$msg_key} || [];
+    my @array = @{ delete $msg->{$msg_key} || [] };
+
+    if ($options->{max_num}) {
+        @array = splice @array, 0, $options->{max_num};
+    }
 
     return [
-        map { $content_key => $_ }
-        @$array
+        map { $options->{send_as} => $_ }
+        @array
     ];
 }
 
