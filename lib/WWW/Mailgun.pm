@@ -17,6 +17,11 @@ my @GET_METHODS = qw/stats domains log mailboxes/;
 my @POST_METHODS = qw//;
 my @ALL_METHODS = (@GET_METHODS, @POST_METHODS);
 
+my $OPTION__ALIAS = {
+    attachments => 'attachment',
+    tags        => 'o:tag',
+};
+
 my $OPTION__MAXIMUM = {
     "o:tag" => 3,
 };
@@ -117,12 +122,12 @@ to
 sub _prepare_content {
     my ($msg) = @_;
 
-    $msg->{attachment} = delete $msg->{attachments};
-
     my $content = [];
     my $option__count = {};
 
     while (my ( $option, $value ) = each %$msg) {
+        $option = $OPTION__ALIAS->{$option} || $option;
+
         if (ref $value eq 'ARRAY') {
             for (@$value) {
                 $option__count->{$option}++;
