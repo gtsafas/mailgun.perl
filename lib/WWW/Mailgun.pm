@@ -105,11 +105,11 @@ sub send {
     return from_json($r->decoded_content);
 }
 
-=head2 _prepare_content($msg) : \@content
+=head2 _prepare_content($option__values) : \@content
 
-Given a $msg hashref, transform it to an arrayref suitable for sending
-as multipart/form-data. The core logic here is that array references are
-modified from:
+Given a $option__values hashref, transform it to an arrayref suitable for
+sending as multipart/form-data. The core logic here is that array references
+are modified from:
 
     option => [ value1, value2, ... ]
 
@@ -120,12 +120,12 @@ to
 =cut
 
 sub _prepare_content {
-    my ($msg) = @_;
+    my ($option__values) = @_;
 
     my $content = [];
     my $option__count = {};
 
-    while (my ($option, $value) = each %$msg) {
+    while (my ($option, $value) = each %$option__values) {
         $option = $OPTION__ALIAS->{$option} || $option;
         my $values = ref $value ? $value : [$value];
 
