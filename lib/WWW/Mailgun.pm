@@ -68,7 +68,7 @@ sub _handle_response {
 
     my $rc = $response->code;
 
-    return 1 if $rc == 200;
+    return 1 if 200 <= $rc && $rc <= 299; # success
 
     my $json = from_json($response->decoded_content);
     if ($json->{message}) {
