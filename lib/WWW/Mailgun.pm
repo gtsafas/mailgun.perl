@@ -125,22 +125,18 @@ sub _prepare_content {
     my $content = [];
     my $option__count = {};
 
-    while (my ( $option, $value ) = each %$msg) {
+    while (my ($option, $value) = each %$msg) {
         $option = $OPTION__ALIAS->{$option} || $option;
+        my $values = ref $value ? $value : [$value];
 
-        if (ref $value eq 'ARRAY') {
-            for (@$value) {
-                $option__count->{$option}++;
-                if ($OPTION__MAXIMUM->{$option} &&
+        for (@$values) {
+            $option__count->{$option}++;
+            if ($OPTION__MAXIMUM->{$option} &&
                     $option__count->{$option} > $OPTION__MAXIMUM->{$option}) {
-                    warn "Reached max number of $option, skipping...";
-                    last;
-                }
-                push @$content, $option => $_;
+                warn "Reached max number of $option, skipping...";
+                last;
             }
-        }
-        else {
-            push @$content, $option => $value;
+            push @$content, $option => $_;
         }
     }
 
