@@ -91,16 +91,7 @@ sub send {
     $msg->{subject} = $msg->{subject} // "";
     $msg->{text} = $msg->{text} // "";
 
-    my $content = _prepare_content(
-        $msg,
-        attachments => {
-            send_as => 'attachment',
-        },
-        tags => {
-            send_as => 'o:tag',
-            max_num => 3,
-        },
-    );
+    my $content = _prepare_content($msg);
 
     my $r = $self->{post}->($self, 'messages', $content);
 
@@ -109,12 +100,17 @@ sub send {
     return from_json($r->decoded_content);
 }
 
-=head2 _prepare_content($msg, %msg_key__options) : \@content
+=head2 _prepare_content($msg) : \@content
 
 Given a $msg hashref, transform it to an arrayref suitable for sending
-as multipart/form-data. By default, keys in $msg are copied to the options
-arrayref as is. Array keys need to be transformed in a special way, and you
-should define them in %msg_key__options.
+as multipart/form-data. The core logic here is that array references are
+modified from:
+
+    option => [ value1, value2, ... ]
+
+to
+
+    [ option => value1, option => value2, ... ]
 
 =cut
 
