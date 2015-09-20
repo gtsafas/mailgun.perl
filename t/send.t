@@ -4,7 +4,7 @@ use LWP::UserAgent;
 use JSON;
 use Test::MockModule;
 use Test::More;
-use Test::Deep;
+use Test::Differences;
 use WWW::Mailgun;
 
 my $msg = {
@@ -14,7 +14,7 @@ my $msg = {
     text        => "MailGun is a set of powerful APIs that enable you to ".
                    "send, receive and track email effortlessly.",
     attachments => [ 'hello.txt', 'world.xml' ],
-    tags        => [ 'perl', 'mailgun' ],
+    tags        => [ 'perl', 'mailgun', 'ruby', 'python' ],
 };
 
 my $ua = new Test::MockModule('LWP::UserAgent');
@@ -33,21 +33,9 @@ $ua->mock(post => sub {
         "Content-Type is correct",
     );
 
-    my @content = @{$headers_and_content{Content}};
-    my $hash = {};
-    while ( @content ) {
-        my $key = shift @content;
-        my $value = shift @content;
-        if ($hash->{$key}) {
-            $hash->{$key} = [$hash->{$key}];
-            push @{$hash->{$key}}, $value;
-        }
-        else {
-            $hash->{$key} = $value;
-        }
-    }
+    my $hash = _form_data_to_hash($headers_and_content{Content});
 
-    is_deeply(
+    eq_or_diff(
         $hash,
         {
             'from'       => $msg->{from},
@@ -55,7 +43,7 @@ $ua->mock(post => sub {
             'subject'    => $msg->{subject},
             'text'       => $msg->{text},
             'attachment' => [ 'hello.txt', 'world.xml' ],
-            'o:tag'      => [ 'perl', 'mailgun' ],
+            'o:tag'      => [ 'perl', 'mailgun', 'ruby' ], # spliced
         },
         "Content is correct",
     );
@@ -70,3 +58,23 @@ WWW::Mailgun->new({
 })->send($msg);
 
 done_testing;
+
+sub _form_data_to_hash {
+    my $form_data = shift;
+    my $hash = {};
+    while ( @$form_data ) {
+        my $key = shift @$form_data;
+        my $value = shift @$form_data;
+        if ($hash->{$key}) {
+            if (ref $hash->{$key} eq '') {
+                $hash->{$key} = [$hash->{$key}];
+            }
+            push @{$hash->{$key}}, $value;
+        }
+        else {
+            $hash->{$key} = $value;
+        }
+    }
+
+    return $hash;
+}

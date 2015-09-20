@@ -110,7 +110,7 @@ sub _prepare_content {
 
     my $content = [];
 
-    while ( my ( $msg_key, $options ) = each %$msg_key__options ) {
+    while ( my ( $msg_key, $options ) = each %msg_key__options ) {
         my $extra_content = _get_extra_content($msg, $msg_key, $options);
         push @$content, @$extra_content;
     }
@@ -125,14 +125,12 @@ sub _get_extra_content {
 
     my @array = @{ delete $msg->{$msg_key} || [] };
 
-    if ($options->{max_num}) {
+    if ($options->{max_num} && @array > $options->{max_num}) {
+        warn "Too many $msg_key, splicing...";
         @array = splice @array, 0, $options->{max_num};
     }
 
-    return [
-        map { $options->{send_as} => $_ }
-        @array
-    ];
+    return [ map { $options->{send_as} => $_ } @array ];
 }
 
 sub _get_route {
