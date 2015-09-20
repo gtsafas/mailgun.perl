@@ -105,14 +105,23 @@ sub send {
     return from_json($r->decoded_content);
 }
 
+=head2 _prepare_content($msg, %msg_key__options) : \@content
+
+Given a $msg hashref, transform it to an arrayref suitable for sending
+as multipart/form-data. By default, keys in $msg are copied to the options
+arrayref as is. Array keys need to be transformed in a special way, and you
+should define them in %msg_key__options.
+
+=cut
+
 sub _prepare_content {
     my ($msg, %msg_key__options) = @_;
 
     my $content = [];
 
     while ( my ( $msg_key, $options ) = each %msg_key__options ) {
-        my $extra_content = _get_extra_content($msg, $msg_key, $options);
-        push @$content, @$extra_content;
+        my $array_content = _transform_array_content($msg, $msg_key, $options);
+        push @$content, @$array_content;
     }
 
     push @$content, %$msg;
@@ -120,7 +129,26 @@ sub _prepare_content {
     return $content;
 }
 
-sub _get_extra_content {
+=head2 _transform_array_content($msg, $msg_key, $options) : \@content
+
+Given a $msg hashref, a $msg_key and some $options, transform the array data
+to the format expected by multipart/form-data. For example, the client can
+accept:
+
+attachments => [ 'hello.txt', 'world.xml' ]
+
+but this must be sent to the MailGun API as
+
+[ attachment => 'hello.txt', attachment => 'world.xml' ]
+
+Supported $options are:
+
+    send_as - the attribute key expected by the Mailgun API
+    max_num - the maximum number of values allowed for this attribute
+
+=cut
+
+sub _transform_array_content {
     my ($msg, $msg_key, $options) = @_;
 
     my @array = @{ delete $msg->{$msg_key} || [] };
@@ -207,21 +235,21 @@ WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
 
     use WWW::Mailgun;
 
-    my $mg = WWW::Mailgun->new({ 
+    my $mg = WWW::Mailgun->new({
         key => 'key-yOuRapiKeY',
         domain => 'YourDomain.mailgun.org',
         from => 'elb0w <elb0w@YourDomain.mailgun.org>' # Optionally set here, you can set it when you send
     });
 
     #sending examples below
-   
+
     # Get stats http://documentation.mailgun.net/api-stats.html
     my $obj = $mg->stats; 
 
     # Get logs http://documentation.mailgun.net/api-logs.html
     my $obj = $mg->logs; 
 
-    
+
 =head1 DESCRIPTION
 
 Mailgun is a email service which provides email over a http restful API.
