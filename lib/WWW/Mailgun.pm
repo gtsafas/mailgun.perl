@@ -225,10 +225,10 @@ WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
     #sending examples below
 
     # Get stats http://documentation.mailgun.net/api-stats.html
-    my $obj = $mg->stats; 
+    my $obj = $mg->stats;
 
     # Get logs http://documentation.mailgun.net/api-logs.html
-    my $obj = $mg->logs; 
+    my $obj = $mg->logs;
 
 
 =head1 DESCRIPTION
@@ -290,9 +290,9 @@ L<http://documentation.mailgun.net/api_reference.html>
 =item Unsubscribes
 
     # View all unsubscribes L<http://documentation.mailgun.net/api-unsubscribes.html>
-    my $all = $mg->unsubscribes; 
+    my $all = $mg->unsubscribes;
 
-    # Unsubscribe user from all 
+    # Unsubscribe user from all
     $mg->unsubscribes('post',{address => 'user@website.com', tag => '*'});
 
     # Delete a user from unsubscriptions
@@ -302,11 +302,11 @@ L<http://documentation.mailgun.net/api_reference.html>
     $mg->unsubscribes('get','user@website.com');
 
 
-    
+
 =item Complaints
-    
+
     # View all spam complaints L<http://documentation.mailgun.net/api-complaints.html>
-    my $all = $mg->complaints; 
+    my $all = $mg->complaints;
 
     # Add a spam complaint for a address
     $mg->complaints('post',{address => 'user@website.com'});
@@ -320,7 +320,7 @@ L<http://documentation.mailgun.net/api_reference.html>
 =item Bounces
 
     # View the list of bounces L<http://documentation.mailgun.net/api-bounces.html>
-    my $all = $mg->bounces; 
+    my $all = $mg->bounces;
 
     # Add a permanent bounce
     $mg->bounces('post',{
