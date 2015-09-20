@@ -43,20 +43,22 @@ $ua->mock(post => sub {
 
     is_deeply(
         {
-            from    => $hash->{from}->[0],
-            to      => $hash->{to}->[0],
-            subject => $hash->{subject}->[0],
-            text    => $hash->{text}->[0],
+            from    => delete($hash->{from})->[0],
+            to      => delete($hash->{to})->[0],
+            subject => delete($hash->{subject})->[0],
+            text    => delete($hash->{text})->[0],
         },
         $msg,
         "Standard fields are correct",
     );
 
     cmp_bag(
-        $hash->{attachment},
+        delete $hash->{attachment},
         [ 'hello.txt', 'world.xml' ],
         "Attachments are correct",
     );
+
+    is_deeply($hash, {}, "All items accounted for");
 
     return HTTP::Response->new(200, "OK", [], to_json({}));
 });
