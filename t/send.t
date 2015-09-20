@@ -8,13 +8,13 @@ use Test::Differences;
 use WWW::Mailgun;
 
 my $msg = {
-    from        => "sender\@acme.com",
-    to          => "recipient\@acme.com",
-    subject     => "Hello, World",
-    text        => "MailGun is a set of powerful APIs that enable you to ".
-                   "send, receive and track email effortlessly.",
-    attachments => [ 'hello.txt', 'world.xml' ],
-    tags        => [ 'perl', 'mailgun', 'ruby', 'python' ],
+    'from'        => "sender\@acme.com",
+    'to'          => "recipient\@acme.com",
+    'subject'     => "Hello, World",
+    'text'        => "MailGun is a set of powerful APIs that enable you to ".
+                     "send, receive and track email effortlessly.",
+    'attachments' => [ 'hello.txt', 'world.xml' ],
+    'o:tag'       => [ 'perl', 'mailgun', 'ruby', 'python' ],
 };
 
 my $ua = new Test::MockModule('LWP::UserAgent');

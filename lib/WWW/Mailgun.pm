@@ -17,6 +17,10 @@ my @GET_METHODS = qw/stats domains log mailboxes/;
 my @POST_METHODS = qw//;
 my @ALL_METHODS = (@GET_METHODS, @POST_METHODS);
 
+my $OPTION__MAXIMUM = {
+    "o:tag" => 3,
+};
+
 sub new {
     my ($class, $param) = @_;
 
@@ -115,50 +119,31 @@ should define them in %msg_key__options.
 =cut
 
 sub _prepare_content {
-    my ($msg, %msg_key__options) = @_;
+    my ($msg) = @_;
+
+    $msg->{attachment} = delete $msg->{attachments};
 
     my $content = [];
+    my $option__count = {};
 
-    while ( my ( $msg_key, $options ) = each %msg_key__options ) {
-        my $array_content = _transform_array_content($msg, $msg_key, $options);
-        push @$content, @$array_content;
+    while (my ( $option, $value ) = each %$msg) {
+        if (ref $value eq 'ARRAY') {
+            for (@$value) {
+                $option__count->{$option}++;
+                if ($OPTION__MAXIMUM->{$option} &&
+                    $option__count->{$option} > $OPTION__MAXIMUM->{$option}) {
+                    warn "Reached max number of $option, skipping...";
+                    last;
+                }
+                push @$content, $option => $_;
+            }
+        }
+        else {
+            push @$content, $option => $value;
+        }
     }
-
-    push @$content, %$msg;
 
     return $content;
-}
-
-=head2 _transform_array_content($msg, $msg_key, $options) : \@content
-
-Given a $msg hashref, a $msg_key and some $options, transform the array data
-to the format expected by multipart/form-data. For example, the client can
-accept:
-
-attachments => [ 'hello.txt', 'world.xml' ]
-
-but this must be sent to the MailGun API as
-
-[ attachment => 'hello.txt', attachment => 'world.xml' ]
-
-Supported $options are:
-
-    send_as - the attribute key expected by the Mailgun API
-    max_num - the maximum number of values allowed for this attribute
-
-=cut
-
-sub _transform_array_content {
-    my ($msg, $msg_key, $options) = @_;
-
-    my @array = @{ delete $msg->{$msg_key} || [] };
-
-    if ($options->{max_num} && @array > $options->{max_num}) {
-        warn "Too many $msg_key, splicing...";
-        @array = splice @array, 0, $options->{max_num};
-    }
-
-    return [ map { $options->{send_as} => $_ } @array ];
 }
 
 sub _get_route {
