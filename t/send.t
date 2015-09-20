@@ -14,6 +14,7 @@ my $msg = {
     text        => "MailGun is a set of powerful APIs that enable you to ".
                    "send, receive and track email effortlessly.",
     attachments => [ 'hello.txt', 'world.xml' ],
+    tags        => [ 'perl', 'mailgun' ],
 };
 
 my $ua = new Test::MockModule('LWP::UserAgent');
@@ -37,28 +38,27 @@ $ua->mock(post => sub {
     while ( @content ) {
         my $key = shift @content;
         my $value = shift @content;
-        $hash->{$key} ||= [];
-        push @{$hash->{$key}}, $value;
+        if ($hash->{$key}) {
+            $hash->{$key} = [$hash->{$key}];
+            push @{$hash->{$key}}, $value;
+        }
+        else {
+            $hash->{$key} = $value;
+        }
     }
 
     is_deeply(
+        $hash,
         {
-            from    => delete($hash->{from})->[0],
-            to      => delete($hash->{to})->[0],
-            subject => delete($hash->{subject})->[0],
-            text    => delete($hash->{text})->[0],
+            'from'       => $msg->{from},
+            'to'         => $msg->{to},
+            'subject'    => $msg->{subject},
+            'text'       => $msg->{text},
+            'attachment' => [ 'hello.txt', 'world.xml' ],
+            'o:tag'      => [ 'perl', 'mailgun' ],
         },
-        $msg,
-        "Standard fields are correct",
+        "Content is correct",
     );
-
-    cmp_bag(
-        delete $hash->{attachment},
-        [ 'hello.txt', 'world.xml' ],
-        "Attachments are correct",
-    );
-
-    is_deeply($hash, {}, "All items accounted for");
 
     return HTTP::Response->new(200, "OK", [], to_json({}));
 });

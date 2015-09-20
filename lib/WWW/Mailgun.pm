@@ -30,7 +30,6 @@ sub new {
         url => $Url . '/',
         domain => $Domain,
         from => $From,
-
     };
 
     $self->{get} = sub {
@@ -60,21 +59,27 @@ sub _handle_response {
 
     my $rc = $response->code;
 
-    return 1 if $rc  == 200;
+    return 1 if $rc == 200;
+
+    my $json = from_json($response->decoded_content);
+    if ($json->{message}) {
+        die $response->status_line." ".$json->{message};
+    }
 
     die "Bad Request - Often missing a required parameter" if $rc == 400;
     die "Unauthorized - No valid API key provided" if $rc == 401;
     die "Request Failed - Parameters were valid but request failed" if $rc == 402;
     die "Not Found - The requested item doesn’t exist" if $rc == 404;
     die "Server Errors - something is wrong on Mailgun’s end" if $rc >= 500;
-
 }
 
 sub send {
     my ($self, $msg)  = @_;
 
-    $msg->{from} = $msg->{from} // $self->{from};
-    $msg->{to} = $msg->{to} // die "You must specify an email address to send to";
+    $msg->{from} = $msg->{from} || $self->{from}
+        or die "You must specify an email address to send from";
+    $msg->{to} = $msg->{to}
+        or die "You must specify an email address to send to";
     if (ref $msg->{to} eq 'ARRAY') {
         $msg->{to} = join(',',@{$msg->{to}});
     }
@@ -82,19 +87,45 @@ sub send {
     $msg->{subject} = $msg->{subject} // "";
     $msg->{text} = $msg->{text} // "";
 
-    my $attachments = delete $msg->{attachments};
-    my $content = [%$msg];
-    if ( $attachments && ref $attachments eq 'ARRAY' ) {
-        for my $a ( @$attachments ) {
-            push @$content, attachment => $a;
-        }
-    }
+    my $content = _prepare_content(
+        $msg,
+        {
+            attachments => 'attachment',
+            tags        => 'o:tag',
+        },
+    );
 
     my $r = $self->{post}->($self, 'messages', $content);
 
     _handle_response($r);
 
     return from_json($r->decoded_content);
+}
+
+sub _prepare_content {
+    my ($msg, $msg_key__content_key) = @_;
+
+    my $content = [];
+
+    while ( my ( $msg_key, $content_key ) = each %$msg_key__content_key ) {
+        my $extra_content = _get_extra_content($msg, $msg_key, $content_key);
+        push @$content, @$extra_content;
+    }
+
+    push @$content, %$msg;
+
+    return $content;
+}
+
+sub _get_extra_content {
+    my ($msg, $msg_key, $content_key) = @_;
+
+    my $array = delete $msg->{$msg_key} || [];
+
+    return [
+        map { $content_key => $_ }
+        @$array
+    ];
 }
 
 sub _get_route {
@@ -114,7 +145,7 @@ sub _get_route {
 sub unsubscribes {
     my ($self, $method, $data) = @_;
     $method = $method // 'get';
-    
+
     my $r = $self->{lc($method)}->($self,'unsubscribes',$data);
     _handle_response($r);
     return from_json($r->decoded_content);
