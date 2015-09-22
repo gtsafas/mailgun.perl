@@ -17,6 +17,15 @@ my @GET_METHODS = qw/stats domains log mailboxes/;
 my @POST_METHODS = qw//;
 my @ALL_METHODS = (@GET_METHODS, @POST_METHODS);
 
+my $OPTION__ALIAS = {
+    attachments => 'attachment',
+    tags        => 'o:tag',
+};
+
+my $OPTION__MAXIMUM = {
+    "o:tag" => 3,
+};
+
 sub new {
     my ($class, $param) = @_;
 
@@ -30,7 +39,6 @@ sub new {
         url => $Url . '/',
         domain => $Domain,
         from => $From,
-
     };
 
     $self->{get} = sub {
@@ -60,21 +68,27 @@ sub _handle_response {
 
     my $rc = $response->code;
 
-    return 1 if $rc  == 200;
+    return 1 if 200 <= $rc && $rc <= 299; # success
+
+    my $json = from_json($response->decoded_content);
+    if ($json->{message}) {
+        die $response->status_line." ".$json->{message};
+    }
 
     die "Bad Request - Often missing a required parameter" if $rc == 400;
     die "Unauthorized - No valid API key provided" if $rc == 401;
     die "Request Failed - Parameters were valid but request failed" if $rc == 402;
     die "Not Found - The requested item doesn’t exist" if $rc == 404;
     die "Server Errors - something is wrong on Mailgun’s end" if $rc >= 500;
-
 }
 
 sub send {
     my ($self, $msg)  = @_;
 
-    $msg->{from} = $msg->{from} // $self->{from};
-    $msg->{to} = $msg->{to} // die "You must specify an email address to send to";
+    $msg->{from} = $msg->{from} || $self->{from}
+        or die "You must specify an email address to send from";
+    $msg->{to} = $msg->{to}
+        or die "You must specify an email address to send to";
     if (ref $msg->{to} eq 'ARRAY') {
         $msg->{to} = join(',',@{$msg->{to}});
     }
@@ -82,19 +96,51 @@ sub send {
     $msg->{subject} = $msg->{subject} // "";
     $msg->{text} = $msg->{text} // "";
 
-    my $attachments = delete $msg->{attachments};
-    my $content = [%$msg];
-    if ( $attachments && ref $attachments eq 'ARRAY' ) {
-        for my $a ( @$attachments ) {
-            push @$content, attachment => $a;
-        }
-    }
+    my $content = _prepare_content($msg);
 
     my $r = $self->{post}->($self, 'messages', $content);
 
     _handle_response($r);
 
     return from_json($r->decoded_content);
+}
+
+=head2 _prepare_content($option__values) : \@content
+
+Given a $option__values hashref, transform it to an arrayref suitable for
+sending as multipart/form-data. The core logic here is that array references
+are modified from:
+
+    option => [ value1, value2, ... ]
+
+to
+
+    [ option => value1, option => value2, ... ]
+
+=cut
+
+sub _prepare_content {
+    my ($option__values) = @_;
+
+    my $content = [];
+    my $option__count = {};
+
+    while (my ($option, $value) = each %$option__values) {
+        $option = $OPTION__ALIAS->{$option} || $option;
+        my $values = ref $value ? $value : [$value];
+
+        for (@$values) {
+            $option__count->{$option}++;
+            if ($OPTION__MAXIMUM->{$option} &&
+                    $option__count->{$option} > $OPTION__MAXIMUM->{$option}) {
+                warn "Reached max number of $option, skipping...";
+                last;
+            }
+            push @$content, $option => $_;
+        }
+    }
+
+    return $content;
 }
 
 sub _get_route {
@@ -114,7 +160,7 @@ sub _get_route {
 sub unsubscribes {
     my ($self, $method, $data) = @_;
     $method = $method // 'get';
-    
+
     my $r = $self->{lc($method)}->($self,'unsubscribes',$data);
     _handle_response($r);
     return from_json($r->decoded_content);
@@ -171,21 +217,21 @@ WWW::Mailgun - Perl wrapper for Mailgun (L<http://mailgun.org>)
 
     use WWW::Mailgun;
 
-    my $mg = WWW::Mailgun->new({ 
+    my $mg = WWW::Mailgun->new({
         key => 'key-yOuRapiKeY',
         domain => 'YourDomain.mailgun.org',
         from => 'elb0w <elb0w@YourDomain.mailgun.org>' # Optionally set here, you can set it when you send
     });
 
     #sending examples below
-   
+
     # Get stats http://documentation.mailgun.net/api-stats.html
-    my $obj = $mg->stats; 
+    my $obj = $mg->stats;
 
     # Get logs http://documentation.mailgun.net/api-logs.html
-    my $obj = $mg->logs; 
+    my $obj = $mg->logs;
 
-    
+
 =head1 DESCRIPTION
 
 Mailgun is a email service which provides email over a http restful API.
@@ -245,9 +291,9 @@ L<http://documentation.mailgun.net/api_reference.html>
 =item Unsubscribes
 
     # View all unsubscribes L<http://documentation.mailgun.net/api-unsubscribes.html>
-    my $all = $mg->unsubscribes; 
+    my $all = $mg->unsubscribes;
 
-    # Unsubscribe user from all 
+    # Unsubscribe user from all
     $mg->unsubscribes('post',{address => 'user@website.com', tag => '*'});
 
     # Delete a user from unsubscriptions
@@ -257,11 +303,11 @@ L<http://documentation.mailgun.net/api_reference.html>
     $mg->unsubscribes('get','user@website.com');
 
 
-    
+
 =item Complaints
-    
+
     # View all spam complaints L<http://documentation.mailgun.net/api-complaints.html>
-    my $all = $mg->complaints; 
+    my $all = $mg->complaints;
 
     # Add a spam complaint for a address
     $mg->complaints('post',{address => 'user@website.com'});
@@ -275,7 +321,7 @@ L<http://documentation.mailgun.net/api_reference.html>
 =item Bounces
 
     # View the list of bounces L<http://documentation.mailgun.net/api-bounces.html>
-    my $all = $mg->bounces; 
+    my $all = $mg->bounces;
 
     # Add a permanent bounce
     $mg->bounces('post',{
