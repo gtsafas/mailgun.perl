@@ -1,5 +1,3 @@
-
-#!start included /Users/keith/perl5/perlbrew/perls/perl-5.20.1/lib/site_perl/5.20.1/ExtUtils/MANIFEST.SKIP
 # Avoid version control files.
 \bRCS\b
 \bCVS\b
@@ -59,6 +57,5 @@
 
 # Avoid MYMETA files
 ^MYMETA\.
-#!end included /Users/keith/perl5/perlbrew/perls/perl-5.20.1/lib/site_perl/5.20.1/ExtUtils/MANIFEST.SKIP
 
-^blib
+\.tar\.gz$
