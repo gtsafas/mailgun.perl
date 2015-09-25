@@ -1,1 +1,9 @@
 *.swp
+*.tar.gz
+*.bak
+
+blib/
+Makefile
+MANIFEST
+MYMETA.*
+pm_to_blib
