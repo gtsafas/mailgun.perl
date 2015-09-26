@@ -9,7 +9,7 @@ use MIME::Base64;
 require LWP::UserAgent;
 
 BEGIN {
-    our $VERSION = 0.51;
+    our $VERSION = 0.52;
 }
 
 my @IGNORE_DOMAIN = qw/domains/;
