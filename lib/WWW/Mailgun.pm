@@ -17,7 +17,7 @@ my @GET_METHODS = qw/stats domains log mailboxes/;
 my @POST_METHODS = qw//;
 my @ALL_METHODS = (@GET_METHODS, @POST_METHODS);
 
-my $OPTION__ALIAS = {
+my $ALIAS__OPTION = {
     attachments => 'attachment',
     tags        => 'o:tag',
 };
@@ -125,18 +125,19 @@ sub _prepare_content {
     my $content = [];
     my $option__count = {};
 
-    while (my ($option, $value) = each %$option__values) {
-        $option = $OPTION__ALIAS->{$option} || $option;
-        my $values = ref $value ? $value : [$value];
+    while (my ($option, $values) = each %$option__values) {
+        $option = $ALIAS__OPTION->{$option} || $option;
+        $values = ref $values ? $values : [$values];
 
-        for (@$values) {
+        for my $value (@$values) {
             $option__count->{$option}++;
             if ($OPTION__MAXIMUM->{$option} &&
                     $option__count->{$option} > $OPTION__MAXIMUM->{$option}) {
                 warn "Reached max number of $option, skipping...";
                 last;
             }
-            push @$content, $option => $_;
+            $value = [ $value ] if $option eq 'attachment';
+            push @$content, $option => $value;
         }
     }
 
