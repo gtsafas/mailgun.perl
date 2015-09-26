@@ -1,1 +1,0 @@
-A set of powerful APIs that enable you to send, receive and track email from your app effortlessly whether you use Python, Ruby, PHP, C#, Node.js or Java.
