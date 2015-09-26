@@ -29,13 +29,7 @@ my $expect = {
     'o:tag'      => [ 'perl', 'mailgun', 'ruby' ], # spliced
 };
 
-my $mg_attrs = {
-    key    => 'key-3ax6xnjp29jd6fds4gc373sgvjxteol0',
-    domain => 'samples.mailgun.org',
-};
-
-$mg_attrs->{ua} = _mock_ua($expect);
-WWW::Mailgun->new($mg_attrs)->send($msg);
+_send_and_assert($msg, $expect);
 
 $msg = {
     to => 'some_email@gmail.com',
@@ -44,11 +38,12 @@ $msg = {
     attachment => ['hello.txt']
 };
 
-$mg_attrs->{ua} = _mock_ua($expect);
-$mg_attrs->{from} = "sender\@acme.com";
+my $extra_mg_attrs = {
+    from => "sender\@acme.com",
+};
 
 $expect = {
-    'from'       => [ $mg_attrs->{from} ],
+    'from'       => [ $extra_mg_attrs->{from} ],
     'to'         => [ $msg->{to} ],
     'subject'    => [ $msg->{subject} ],
     'html'       => [ $msg->{html} ],
@@ -56,9 +51,20 @@ $expect = {
     'attachment' => [ [ 'hello.txt' ] ],
 };
 
-WWW::Mailgun->new($mg_attrs)->send($msg);
+_send_and_assert($msg, $expect, $extra_mg_attrs);
 
 done_testing;
+
+sub _send_and_assert {
+    my ($msg, $expect, $extra_mg_attrs) = @_;
+
+    WWW::Mailgun->new({
+        key    => 'key-3ax6xnjp29jd6fds4gc373sgvjxteol0',
+        domain => 'samples.mailgun.org',
+        ua     => _mock_ua($expect),
+        %{ $extra_mg_attrs || {} },
+    })->send($msg);
+}
 
 sub _mock_ua {
     my $ua = new Test::MockModule('LWP::UserAgent');
