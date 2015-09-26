@@ -53,6 +53,10 @@ $expect = {
 
 _send_and_assert($msg, $expect, $extra_mg_attrs);
 
+# Module users shouldn't have to know that attachments need to be in an array.
+$msg->{attachment} = 'hello.txt';
+_send_and_assert($msg, $expect, $extra_mg_attrs);
+
 done_testing;
 
 sub _send_and_assert {
