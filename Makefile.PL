@@ -13,6 +13,7 @@ WriteMakefile(
     'JSON'                 => 0,
     'LWP::Protocol::https' => 0,
     'LWP::UserAgent'       => 0,
+    'match::simple'        => 0,
     'MIME::Base64'         => 0,
   },
   BUILD_REQUIRES => {
