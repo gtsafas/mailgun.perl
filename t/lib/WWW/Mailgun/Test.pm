@@ -2,7 +2,7 @@ package WWW::Mailgun::Test;
 
 use Test::Most;
 
-use List::Util qw/first/;
+use File::Temp;
 use LWP::UserAgent;
 use WWW::Mailgun;
 
@@ -31,16 +31,31 @@ sub new {
 
 sub assert_request_part {
     my $self = shift;
-    my ($name, $part_as_string) = @_;
+    my ($part_as_string) = @_;
 
-    my $part = first {
-        $_->header("Content-Disposition") =~ m/name="$name"/
-    } $self->{request}->parts;
+    ok(
+        $self->_get_matching_parts($part_as_string),
+        "Found part ($part_as_string).",
+    );
+}
 
-    is(
-        $part->as_string,
-        $part_as_string,
-        "Got expected request part ($name) => ($part_as_string)",
+sub _get_matching_parts {
+    my $self = shift;
+    my ($part_as_string) = @_;
+
+    return
+        grep { $_ eq $part_as_string }
+        map { $_->as_string }
+        $self->{request}->parts;
+}
+
+sub assert_no_request_part {
+    my $self = shift;
+    my ($part_as_string) = @_;
+
+    ok(
+        !$self->_get_matching_parts($part_as_string),
+        "Did not find part ($part_as_string).",
     );
 }
 
@@ -54,6 +69,24 @@ sub assert_send {
     }, "Message was queued.");
 
     return $res;
+}
+
+sub new_file_temp {
+    my ($self) = shift;
+    my ($ext, $content) = @_;
+
+    my $handle = File::Temp->new(suffix => ".$ext");
+    my $path = $handle->filename;
+    my ($name) = $path =~ m/(\w+\.$ext)$/;
+
+    print $handle $content if $content;
+    close $handle;
+
+    return {
+        path => $path,
+        name => $name,
+        handle => $handle,
+    };
 }
 
 

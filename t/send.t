@@ -1,107 +1,97 @@
-use strict;
-use warnings;
+use Test::Most;
 
-use LWP::UserAgent;
-use JSON;
-use Test::MockModule;
-use Test::More;
-use Test::Differences;
-use WWW::Mailgun;
+use WWW::Mailgun::Test;
 
-my $msg = {
-    'from'        => "sender\@acme.com",
-    'to'          => "recipient\@acme.com",
+my $mg = WWW::Mailgun::Test->new();
+
+my $txt_file = $mg->new_file_temp("txt", "Hello, world.");
+my $txt_filename = $txt_file->{name};
+
+my $xml_file = $mg->new_file_temp("xml", "<hello>world</hello>");
+my $xml_filename = $xml_file->{name};
+
+$mg->assert_send({
+    'to'          => 'test-recipient@samples.mailgun.org',
     'subject'     => "Hello, World",
     'text'        => "MailGun is a set of powerful APIs that enable you to ".
-                     "send, receive and track email effortlessly.",
-    'attachments' => [ 'hello.txt', 'world.xml' ],
+                    "send, receive and track email effortlessly.",
+    'attachments' => [ $xml_file->{path}, $txt_file->{path} ],
     'o:tag'       => [ 'perl', 'mailgun', 'ruby', 'python' ],
-};
+});
 
-my $expect = {
-    'from'       => [ $msg->{from} ],
-    'to'         => [ $msg->{to} ],
-    'subject'    => [ $msg->{subject} ],
-    'text'       => [ $msg->{text} ],
-    'attachment' => [ [ 'hello.txt' ], [ 'world.xml' ] ],
-    'o:tag'      => [ 'perl', 'mailgun', 'ruby' ], # spliced
-};
+for (qw/perl mailgun ruby/) {
+    $mg->assert_request_part(<<"END"
+Content-Disposition: form-data; name="o:tag"
 
-_send_and_assert($msg, $expect);
+$_
+END
+    );
+}
 
-$msg = {
-    to => 'some_email@gmail.com',
+$mg->assert_no_request_part(<<END
+Content-Disposition: form-data; name="o:tag"
+
+python
+END
+);
+
+$mg->assert_request_part(<<"END"
+Content-Type: application/xml
+Content-Disposition: form-data; name="attachment"; filename="$xml_filename"
+
+<hello>world</hello>
+END
+);
+
+assert_txt_file_part();
+
+$mg->assert_request_part(<<END
+Content-Disposition: form-data; name="text"
+
+MailGun is a set of powerful APIs that enable you to send, receive and track email effortlessly.
+END
+);
+
+$mg->assert_send({
+    to => 'test-recipient@samples.mailgun.org',
     subject => 'hello',
     html => '<html><h3>hello</h3><strong>world</strong></html>',
-    attachment => ['hello.txt']
-};
+    attachment => [$txt_file->{path}],
+});
 
-my $extra_mg_attrs = {
-    from => "sender\@acme.com",
-};
+assert_txt_file_part();
+assert_html_part();
 
-$expect = {
-    'from'       => [ $extra_mg_attrs->{from} ],
-    'to'         => [ $msg->{to} ],
-    'subject'    => [ $msg->{subject} ],
-    'html'       => [ $msg->{html} ],
-    'text'       => [ '' ],
-    'attachment' => [ [ 'hello.txt' ] ],
-};
+$mg->assert_send({
+    to => 'test-recipient@samples.mailgun.org',
+    subject => 'hello',
+    html => '<html><h3>hello</h3><strong>world</strong></html>',
 
-_send_and_assert($msg, $expect, $extra_mg_attrs);
+    # Module users shouldn't have to know that attachments need to be in an
+    # array.
+    attachment => $txt_file->{path},
+});
 
-# Module users shouldn't have to know that attachments need to be in an array.
-$msg->{attachment} = 'hello.txt';
-_send_and_assert($msg, $expect, $extra_mg_attrs);
+assert_txt_file_part();
+assert_html_part();
+
+sub assert_txt_file_part {
+    $mg->assert_request_part(<<"END"
+Content-Type: text/plain
+Content-Disposition: form-data; name="attachment"; filename="$txt_filename"
+
+Hello, world.
+END
+    );
+}
+
+sub assert_html_part {
+    $mg->assert_request_part(<<"END"
+Content-Disposition: form-data; name="html"
+
+<html><h3>hello</h3><strong>world</strong></html>
+END
+    );
+}
 
 done_testing;
-
-sub _send_and_assert {
-    my ($msg, $expect, $extra_mg_attrs) = @_;
-
-    WWW::Mailgun->new({
-        key    => 'key-3ax6xnjp29jd6fds4gc373sgvjxteol0',
-        domain => 'samples.mailgun.org',
-        ua     => _mock_ua($expect),
-        %{ $extra_mg_attrs || {} },
-    })->send($msg);
-}
-
-sub _mock_ua {
-    my $ua = new Test::MockModule('LWP::UserAgent');
-    $ua->mock(post => sub {
-        my ($self, $uri, %headers_and_content) = @_;
-
-        is(
-            $uri,
-            "https://api.mailgun.net/v2/samples.mailgun.org/messages",
-            "URI is correct"
-        );
-
-        is(
-            $headers_and_content{Content_Type},
-            "multipart/form-data",
-            "Content-Type is correct",
-        );
-
-        my $hash = _form_data_to_hash($headers_and_content{Content});
-        eq_or_diff($hash, $expect, "Content is correct");
-        return HTTP::Response->new(200, "OK", [], to_json({}));
-    });
-
-    return $ua;
-}
-
-sub _form_data_to_hash {
-    my $form_data = shift;
-    my $hash = {};
-    while ( @$form_data ) {
-        my $key = shift @$form_data;
-        my $value = shift @$form_data;
-        $hash->{$key} ||= [];
-        push @{$hash->{$key}}, $value;
-    }
-
-    return $hash;
-}
