@@ -34,9 +34,10 @@ sub new {
     my $Domain = $param->{domain} // die "You need to specify a domain (IE: samples.mailgun.org)";
     my $Url = $param->{url} // "https://api.mailgun.net/v2";
     my $From = $param->{from} // "";
+    my $Ua = $param->{ua} || LWP::UserAgent->new();
 
     my $self = {
-        ua  => LWP::UserAgent->new,
+        ua  => $Ua,
         url => $Url . '/',
         domain => $Domain,
         from => $From,
@@ -87,9 +88,9 @@ sub send {
     my ($self, $msg)  = @_;
 
     $msg->{from} = $msg->{from} || $self->{from}
-        or die "You must specify an email address to send from";
+        or die "You must specify an email address to send from\n";
     $msg->{to} = $msg->{to}
-        or die "You must specify an email address to send to";
+        or die "You must specify an email address to send to\n";
     if (ref $msg->{to} eq 'ARRAY') {
         $msg->{to} = join(',',@{$msg->{to}});
     }
@@ -106,20 +107,16 @@ sub send {
     return from_json($r->decoded_content);
 }
 
-=head2 _prepare_content($option__values) : \@content
-
-Given a $option__values hashref, transform it to an arrayref suitable for
-sending as multipart/form-data. The core logic here is that array references
-are modified from:
-
-    option => [ value1, value2, ... ]
-
-to
-
-    [ option => value1, option => value2, ... ]
-
-=cut
-
+# Given a $option__values hashref, transform it to an arrayref suitable for
+# sending as multipart/form-data. The core logic here is that array references
+# are modified from:
+#
+#    option => [ value1, value2, ... ]
+#
+# to
+#
+#    [ option => value1, option => value2, ... ]
+#
 sub _prepare_content {
     my ($option__values) = @_;
 
@@ -138,6 +135,7 @@ sub _prepare_content {
                 last;
             }
             $value = [ $value ] if $option eq 'attachment';
+            $value = [ $value ] if $option eq 'inline';
             push @$content, $option => $value;
         }
     }

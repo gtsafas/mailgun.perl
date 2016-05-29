@@ -14,10 +14,11 @@ WriteMakefile(
     'LWP::Protocol::https' => 0,
     'LWP::UserAgent'       => 0,
     'MIME::Base64'         => 0,
+    'match::smart'         => 0,
   },
   BUILD_REQUIRES => {
-    'Test::Differences' => 0,
-    'Test::MockModule'  => 0,
+    'Test::Most' => 0,
+    'Test::MockModule' => 0,
   },
   AUTHOR         => 'George Tsafas <elb0w@elbowrage.com>'
 );
