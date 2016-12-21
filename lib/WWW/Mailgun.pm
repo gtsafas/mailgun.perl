@@ -10,7 +10,7 @@ use match::smart;
 require LWP::UserAgent;
 
 BEGIN {
-    our $VERSION = 0.53;
+    our $VERSION = 0.54;
 }
 
 my @IGNORE_DOMAIN = qw/domains/;
