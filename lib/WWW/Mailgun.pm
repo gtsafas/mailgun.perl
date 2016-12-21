@@ -138,6 +138,7 @@ sub _prepare_content {
                 last;
             }
             $value = [ $value ] if $option eq 'attachment';
+            $value = [ $value ] if $option eq 'inline'; #Mailgun also supports inline
             push @$content, $option => $value;
         }
     }
