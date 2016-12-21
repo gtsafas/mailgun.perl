@@ -1,9 +1,4 @@
-#!/usr/bin/perl
-
-use strict;
-use warnings;
-
-use Test::More tests => 6;
+use Test::Most tests => 6;
 use Digest::SHA1;
 
 use WWW::Mailgun;
@@ -14,7 +9,7 @@ $sha1->add(rand);
 
 my $email = $sha1->hexdigest . '@testing.com';
 
-my $mg = WWW::Mailgun->new({ 
+my $mg = WWW::Mailgun->new({
     key => 'key-3ax6xnjp29jd6fds4gc373sgvjxteol0',
     domain => 'samples.mailgun.org'
 });
