@@ -119,7 +119,7 @@ Post optionally takes a hash of properties
     # Remove a complaint
     $mg->complaints('del','user@website.com');
 
-    # Get a complaint for a adress
+    # Get a complaint for a address
     $mg->complaints('get','user@website.com');
 
 ##### Bounces

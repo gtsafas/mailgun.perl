@@ -317,7 +317,7 @@ L<http://documentation.mailgun.net/api_reference.html>
     # Remove a complaint
     $mg->complaints('del','user@website.com');
 
-    # Get a complaint for a adress
+    # Get a complaint for a address
     $mg->complaints('get','user@website.com');
 
 =item Bounces
